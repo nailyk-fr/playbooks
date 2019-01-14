@@ -1,0 +1,14 @@
+- name: Show uname
+  hosts: all
+  become: no
+
+  tasks:
+
+    - name: Show uname
+      command: uname -a
+      register: unames
+
+    - debug:
+        var: unames.stdout_lines
+      tags: debug
+
