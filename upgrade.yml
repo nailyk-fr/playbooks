@@ -1,6 +1,9 @@
 - name: Upgrade all packages to the latest version
   hosts: all
-  apt:
-    update_cache: yes
-    upgrade: yes
+
+  tasks:
+    - apt:
+      name: Update and upgrade packages
+      update_cache: yes
+      upgrade: yes
 
