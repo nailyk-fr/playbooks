@@ -2,8 +2,14 @@
   hosts: all
 
   tasks:
-    - apt:
-      name: Update and upgrade packages
-      update_cache: yes
-      upgrade: yes
+    - ping: ~
 
+    - name: Update APT package manager repositories cache
+      become: true
+      apt:
+        update_cache: yes
+
+    - name: Upgrade installed packages
+      become: true
+      apt:
+        upgrade: dist
