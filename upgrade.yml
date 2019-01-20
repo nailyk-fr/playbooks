@@ -8,12 +8,12 @@
       become: true
       apt:
         update_cache: yes
-      when: ( ({{ hostvars[inventory_hostname].ansible_distribution }} | search("Debian"))
-            or ({{ hostvars[inventory_hostname].ansible_distribution }} | search("Devuan")) )
+      when: ( ( hostvars[inventory_hostname].ansible_distribution | search('Debian'))
+            or ( hostvars[inventory_hostname].ansible_distribution | search('Devuan')) )
 
     - name: Upgrade installed packages
       become: true
       apt:
         upgrade: dist
-      when: ( ({{ hostvars[inventory_hostname].ansible_distribution }} | search("Debian"))
-            or ({{ hostvars[inventory_hostname].ansible_distribution }} | search("Devuan")) )
+      when: ( (hostvars[inventory_hostname].ansible_distribution | search('Debian'))
+            or (hostvars[inventory_hostname].ansible_distribution | search('Devuan')) )
