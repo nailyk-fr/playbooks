@@ -23,6 +23,4 @@
         available: yes
         upgrade: yes
         update_cache: yes
-        repository: '{{ REPO }}'
-      register: result
       when: (hostvars[inventory_hostname].ansible_distribution is search('Alpine'))
