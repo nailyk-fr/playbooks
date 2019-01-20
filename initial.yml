@@ -15,7 +15,7 @@
  
    - name: Deploy SSH Key
      authorized_key: user=ansible
-                     key="{{ lookup('file', playbook_dir'/ansible.pub') }}"
+                     key="{{ lookup('file', playbook_dir + '/ansible.pub') }}"
                      state=present
  
    - name: Disable Root Login
