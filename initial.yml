@@ -1,0 +1,35 @@
+ - hosts: all
+ 
+   tasks:
+ 
+   - name: Add a new user named ansible
+     user:
+          name=ansible
+          create_home=yes
+          system=yes
+ 
+   - name: Add ansible user to the sudoers
+     copy:
+          dest: "/etc/sudoers.d/ansible"
+          content: "ansible  ALL=(ALL)  NOPASSWD: ALL"
+ 
+   - name: Deploy SSH Key
+     authorized_key: user=ansible
+                     key="{{ lookup('file', '/home/nailyk/.ssh/id_rsa.ansible.pub') }}"
+                     state=present
+ 
+   - name: Disable Root Login
+     lineinfile:
+           dest=/etc/ssh/sshd_config
+           regexp='^PermitRootLogin'
+           line="PermitRootLogin no"
+           state=present
+           backup=yes
+     notify:
+       - restart ssh
+ 
+   handlers:
+   - name: restart ssh
+     service:
+       name=sshd
+       state=restarted
