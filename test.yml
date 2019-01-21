@@ -6,6 +6,6 @@
     - ping: ~
     - name: Test adding host to group
       add_host:
-        hostname: "{{ inventory_hostname }}""
+        hostname: "{{ inventory_hostname }}"
         groups:
           - install_done
