@@ -1,0 +1,11 @@
+- name: Show uname
+  hosts: all
+  become: no
+
+  tasks:
+    - ping: ~
+    - name: Test adding host to group
+      add_host:
+        hostname: "{{ inventory_hostname }}""
+        groups:
+          - install_done
