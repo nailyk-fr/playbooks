@@ -19,18 +19,21 @@
             or (hostvars[inventory_hostname].ansible_distribution is search('Devuan')) )
 
     - name: Remove useless packages from the cache
+      become: true
       apt:
         autoclean: yes
       when: ( (hostvars[inventory_hostname].ansible_distribution is search('Debian'))
             or (hostvars[inventory_hostname].ansible_distribution is search('Devuan')) )
 
     - name: Remove dependencies that are no longer required
+      become: true
       apt:
         autoremove: yes
       when: ( (hostvars[inventory_hostname].ansible_distribution is search('Debian'))
             or (hostvars[inventory_hostname].ansible_distribution is search('Devuan')) )
 
     - name: upgrade Alpine
+      become: true
       apk: 
         available: yes
         upgrade: yes
