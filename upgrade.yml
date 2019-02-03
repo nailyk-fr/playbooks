@@ -39,3 +39,17 @@
         upgrade: yes
         update_cache: yes
       when: (hostvars[inventory_hostname].ansible_distribution is search('Alpine'))
+
+    - name: Ensure fail2ban is installed APT
+      apt:
+        name: fail2ban
+        state: present
+      when: ( (hostvars[inventory_hostname].ansible_distribution is search('Debian'))
+            or (hostvars[inventory_hostname].ansible_distribution is search('Devuan')) )
+
+    - name: Ensure fail2ban is installed apk
+      apk:
+        name: fail2ban
+        state: present
+      when: (hostvars[inventory_hostname].ansible_distribution is search('Alpine'))
+
