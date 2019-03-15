@@ -55,7 +55,7 @@
 
     - name: Ensure root login is disabled
       lineinfile:
-        dest: /etc/etc/ssh/sshd_config
+        dest: /etc/ssh/sshd_config
         regexp: "^PermitRootLogin"
         line: "PermitRootLogin no"
 
