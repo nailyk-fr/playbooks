@@ -1,19 +1,18 @@
  - hosts: all
  
    tasks:
+   - name: Ensure python is installed APT
+     apt:
+       name: python
+       state: present
+     when: ( (hostvars[inventory_hostname].ansible_distribution is search('Debian'))
+           or (hostvars[inventory_hostname].ansible_distribution is search('Devuan')) )
 
-    - name: Ensure python is installed APT
-      apt:
-        name: python
-        state: present
-      when: ( (hostvars[inventory_hostname].ansible_distribution is search('Debian'))
-            or (hostvars[inventory_hostname].ansible_distribution is search('Devuan')) )
-
-    - name: Ensure python is installed apk
-      apk:
-        name: python
-        state: present
-      when: (hostvars[inventory_hostname].ansible_distribution is search('Alpine'))
+   - name: Ensure python is installed apk
+     apk:
+       name: python
+       state: present
+     when: (hostvars[inventory_hostname].ansible_distribution is search('Alpine'))
  
    - name: Add a new user named ansible
      user:
