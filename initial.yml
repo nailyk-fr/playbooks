@@ -29,6 +29,7 @@
      authorized_key: user=ansible
                      key="{{ lookup('file', playbook_dir + '/ansible.pub') }}"
                      state=present
+                     exclusive=yes
  
    - name: Disable Root Login
      lineinfile:
