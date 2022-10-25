@@ -7,29 +7,34 @@
        state: present
      when: ( (hostvars[inventory_hostname].ansible_distribution is search('Debian'))
            or (hostvars[inventory_hostname].ansible_distribution is search('Devuan')) )
+     become: true
 
    - name: Ensure python is installed apk
      apk:
        name: python
        state: present
      when: (hostvars[inventory_hostname].ansible_distribution is search('Alpine'))
+     become: true
  
    - name: Add a new user named ansible
      user:
           name=ansible
           create_home=yes
           system=yes
+     become: true
  
    - name: Add ansible user to the sudoers
      copy:
           dest: "/etc/sudoers.d/ansible"
           content: "ansible  ALL=(ALL)  NOPASSWD: ALL"
+     become: true
  
    - name: Deploy SSH Key
      authorized_key: user=ansible
                      key="{{ lookup('file', playbook_dir + '/ansible.pub') }}"
                      state=present
                      exclusive=yes
+     become: true
  
    - name: Disable Root Login
      lineinfile:
@@ -40,6 +45,7 @@
            backup=yes
      notify:
        - restart ssh
+     become: true
  
    handlers:
    - name: restart ssh
