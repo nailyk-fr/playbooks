@@ -45,3 +45,11 @@
      become: true
      delegate_to: "{{ bkp_host }}"
 
+   - name: "Create ssh config"
+     ssh_config:
+       user: "{{ bkp_user }}"
+       host: "{{ bkp_host }}"
+       identity_file: "{{ key_res.filename }}.pub"
+       state: present
+     become: true
+
