@@ -53,3 +53,11 @@
        state: present
      become: true
 
+   - name: "Create fstab mountpoint"
+     mount:
+       state: present
+       path: "/backups/"
+       src: "backups:/data/{{ new_host }}"
+       opts: "noauto,_netdev,user,idmap=user,transform_symlinks,sftp,default_permissions"
+       fstype: "fuse.sshfs"
+     become: true
