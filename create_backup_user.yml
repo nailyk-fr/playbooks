@@ -32,6 +32,7 @@
           name="{{ bkp_user }}"
           create_home=yes
           system=yes
+          shell="/bin/bash"
           home="/data/{{ new_host }}"
      become: true
      delegate_to: "{{ bkp_host }}"
