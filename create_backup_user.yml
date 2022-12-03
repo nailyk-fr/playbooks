@@ -23,6 +23,7 @@
    - name: "Create new ssh keypair for {{ bkp_user }}"
      openssh_keypair:
        path: "~/.ssh/id_rsa.{{ bkp_user }}"
+       comment: "root@{{ bkp_user }}"
      register: key_res
      become: true
 
