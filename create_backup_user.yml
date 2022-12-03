@@ -1,6 +1,7 @@
  - hosts: all
    vars:
-     new_host: ansible_hostname
+     new_host: "{{ ansible_hostname }}"
+     bkp_user: "{{ new_host }}"
      bkp_host: "backups"
 
    tasks:
@@ -21,7 +22,7 @@
 
    - name: "Create new ssh keypair for {{ bkp_user }}"
      openssh_keypair:
-       path: "~/id_rsa.{{ bkp_user }}"
+       path: "~/.ssh/id_rsa.{{ bkp_user }}"
      register: key_res
      become: true
 
