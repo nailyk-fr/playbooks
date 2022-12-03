@@ -1,0 +1,44 @@
+ - hosts: all
+   vars:
+     new_host: {{ ansible_hostname }}
+     bkp_host: backups
+
+   tasks:
+   - name: Ensure sshfs is installed APT
+     apt:
+       name: sshfs
+       state: present
+     when: ( (hostvars[inventory_hostname].ansible_distribution is search('Debian'))
+           or (hostvars[inventory_hostname].ansible_distribution is search('Devuan')) )
+     become: true
+
+   - name: Ensure sshfs is installed apk
+     apk:
+       name: sshfs
+       state: present
+     when: (hostvars[inventory_hostname].ansible_distribution is search('Alpine'))
+     become: true
+
+   - name: Create new ssh keypair for {{ bkp_user }}
+     openssh_keypair:
+       path: ~/id_rsa.{{ bkp_user }}
+     register: key_res
+     become: true
+
+   - name: Add new backup user {{ bkp_user }} on {{ bkp_host }}
+     user:
+          name={{ bkp_user }}
+          create_home=yes
+          system=yes
+          home=/data/{{ new_host }}
+     become: true
+     delegate_to: {{ bkp_host }}
+
+   - name: Deploy SSH Key
+     authorized_key: user={{ bkp_user }}
+                     key={{ key_res.public_key }}
+                     state=present
+                     exclusive=yes
+     become: true
+     delegate_to: {{ bkp_host }}
+
