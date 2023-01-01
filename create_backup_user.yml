@@ -58,6 +58,6 @@
        state: present
        path: "/backups/"
        src: "backups:/data/{{ new_host }}"
-       opts: "noauto,_netdev,user,idmap=user,transform_symlinks,sftp,default_permissions"
+       opts: "noauto,_netdev,user,idmap=user,identityfile={{ key_res.filename }},transform_symlinks,sftp,default_permissions"
        fstype: "fuse.sshfs"
      become: true
