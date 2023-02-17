@@ -1,0 +1,47 @@
+ - hosts: all
+   vars:
+     new_host: "{{ ansible_hostname }}"
+     munin_collector: "forcas.nailyk.fr"
+
+   tasks:
+   - ping: ~
+
+   - name: Display all variables/facts known for a host
+     ansible.builtin.debug:
+       var: hostvars[inventory_hostname]
+
+   - name: Ensure munin-node is installed (Debian/Ubuntu).
+     apt: 
+        name: munin-node
+        state: present
+     when: ( (hostvars[inventory_hostname].ansible_distribution is search('Debian'))
+           or (hostvars[inventory_hostname].ansible_distribution is search('Devuan'))
+           or (hostvars[inventory_hostname].ansible_distribution is search('Ubuntu')) )
+     become: true
+
+   - name: Ensure munin-node is installed (Alpine)
+     apk:
+       name: munin-node
+       state: present
+     when: (hostvars[inventory_hostname].ansible_distribution is search('Alpine'))
+     become: true
+
+   - name: Copy node config
+     copy:
+       src: munin-node.conf.j2
+       dest: /etc/munin/munin-node.conf
+       owner: root
+       group: root
+       mode: '0644'
+     become: true
+
+   - name: Create node config on collector
+     template:
+       src: host.conf.j2
+       dest: "/etc/munin/munin-conf.d/{{ new_host }}.conf"
+       owner: root
+       group: root
+       mode: '0644'
+     delegate_to: "{{ munin_collector }}"
+     become: true
+
