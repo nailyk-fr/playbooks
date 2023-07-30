@@ -12,6 +12,14 @@
         var: unames.stdout_lines
       tags: debug
 
+    - name: Retrieve hostname
+      command: "echo $HOSTNAME"
+      register: remote_hostname
+
+    - debug:
+        var: remote_hostname
+      tags: debug
+
     - debug:
         msg: "{{ hostvars[inventory_hostname].ansible_distribution }}"
     - debug:
