@@ -13,7 +13,7 @@
       tags: debug
 
     - name: Retrieve hostname
-      command: "echo $HOSTNAME"
+      command: echo $HOSTNAME
       register: remote_hostname
 
     - debug:
