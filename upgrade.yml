@@ -10,28 +10,32 @@
       apt:
         update_cache: yes
       when: ( ( hostvars[inventory_hostname].ansible_distribution is search('Debian'))
-            or ( hostvars[inventory_hostname].ansible_distribution is search('Devuan')) )
+            or ( hostvars[inventory_hostname].ansible_distribution is search('Devuan'))
+            or ( hostvars[inventory_hostname].ansible_distribution is search('Ubuntu')) )
 
     - name: Upgrade installed packages APT
       become: true
       apt:
         upgrade: dist
       when: ( (hostvars[inventory_hostname].ansible_distribution is search('Debian'))
-            or (hostvars[inventory_hostname].ansible_distribution is search('Devuan')) )
+            or ( hostvars[inventory_hostname].ansible_distribution is search('Devuan'))
+            or ( hostvars[inventory_hostname].ansible_distribution is search('Ubuntu')) )
 
     - name: Remove useless packages from the cache
       become: true
       apt:
         autoclean: yes
       when: ( (hostvars[inventory_hostname].ansible_distribution is search('Debian'))
-            or (hostvars[inventory_hostname].ansible_distribution is search('Devuan')) )
+            or ( hostvars[inventory_hostname].ansible_distribution is search('Devuan'))
+            or ( hostvars[inventory_hostname].ansible_distribution is search('Ubuntu')) )
 
     - name: Remove dependencies that are no longer required
       become: true
       apt:
         autoremove: yes
       when: ( (hostvars[inventory_hostname].ansible_distribution is search('Debian'))
-            or (hostvars[inventory_hostname].ansible_distribution is search('Devuan')) )
+            or ( hostvars[inventory_hostname].ansible_distribution is search('Devuan'))
+            or ( hostvars[inventory_hostname].ansible_distribution is search('Ubuntu')) )
 
     - name: upgrade Alpine
       become: true
@@ -46,7 +50,8 @@
         name: fail2ban
         state: present
       when: ( (hostvars[inventory_hostname].ansible_distribution is search('Debian'))
-            or (hostvars[inventory_hostname].ansible_distribution is search('Devuan')) )
+            or ( hostvars[inventory_hostname].ansible_distribution is search('Devuan'))
+            or ( hostvars[inventory_hostname].ansible_distribution is search('Ubuntu')) )
 
     - name: Ensure fail2ban is installed apk
       apk:
