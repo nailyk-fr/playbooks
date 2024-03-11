@@ -77,7 +77,7 @@
 
     - name: Move archive into place
       ansible.builtin.copy:
-        src: /tmp/webtrees-{{ webtree_version }}/webtrees
+        src: /tmp/webtrees-{{ webtree_version }}/webtrees/
         dest: "{{ documentroot }}"
         owner: www-data
         group: www-data
