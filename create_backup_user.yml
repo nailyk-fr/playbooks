@@ -20,6 +20,12 @@
      when: (hostvars[inventory_hostname].ansible_distribution is search('Alpine'))
      become: true
 
+   - name: Creates directory
+     become: true
+     file:
+       path: "~/.ssh/"
+       state: directory
+
    - name: "Create new ssh keypair for {{ bkp_user }}"
      openssh_keypair:
        path: "~/.ssh/id_rsa.{{ bkp_user }}"
