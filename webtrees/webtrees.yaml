@@ -14,7 +14,7 @@
       - rewrite
       - php8.2
     - apache_conf_path: "/etc/apache2/"
-    - apache_server_token: Prod
+    - apache_server_token: Minimal
     - apache_server_signature: "Off"
     - apache_trace_enabled: "Off"
     - apache_security_configuration_items:
