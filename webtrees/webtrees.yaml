@@ -1,0 +1,162 @@
+- name: Install base packages
+  hosts: samael
+  gather_facts: true
+  vars:
+    - webtree_version: 2.1.18
+    - servername: "gene.nailyk.fr"
+    - documentroot: "/var/sites/webtrees"
+    - serveradmin: "webtrees@nailyk.fr"
+    - apache_create_vhosts: true
+    - apache_vhosts_filename: "webtrees.conf"
+    - apache_vhosts_template: "vhosts.j2"
+    - apache_remove_default_vhost: true
+    - apache_mods_enabled:
+      - rewrite
+      - php8.2
+    - apache_conf_path: "/etc/apache2/"
+    - apache_server_token: Prod
+    - apache_server_signature: "Off"
+    - apache_trace_enabled: "Off"
+    - apache_security_configuration_items:
+      - regexp: "^ServerTokens "
+        line: "ServerTokens {{ apache_server_token }}"
+      - regexp: "^ServerSignature "
+        line: "ServerSignature {{ apache_server_signature }}"
+      - regexp: "^TraceEnable "
+        line: "TraceEnable {{ apache_trace_enabled }}"
+
+  tasks:
+    - ping: ~
+
+    - name: Install LAMP packages APT
+      apt:
+        name: "{{ item }}"
+        state: present
+      become: true
+      loop: 
+        - apache2
+        - mariadb-server
+        - libapache2-mod-php
+        - php8.2-mysql
+        - php8.2-imagick
+        - unzip
+        - python3-pymysql
+      when: ( (hostvars[inventory_hostname].ansible_distribution is search('Debian'))
+            or ( hostvars[inventory_hostname].ansible_distribution is search('Devuan'))
+            or ( hostvars[inventory_hostname].ansible_distribution is search('Ubuntu')) )
+
+    - name: Download File
+      ansible.builtin.get_url:
+        url: "https://github.com/fisharebest/webtrees/releases/download/{{ webtree_version }}/webtrees-{{ webtree_version }}.zip"
+        dest: "/tmp/webtrees-{{ webtree_version }}.zip"
+
+    - name: Creates /tmp/webtrees-{{ webtree_version }}/ directory
+      file:
+        path: /tmp/webtrees-{{ webtree_version }}/
+        state: directory
+
+    - name: Unarchive source
+      unarchive:
+        src: "/tmp/webtrees-{{ webtree_version }}.zip"
+        dest: "/tmp/webtrees-{{ webtree_version }}/"
+        remote_src: true
+      register: archive_extract
+
+    - name: Creates directory
+      become: true
+      file:
+        path: /var/sites/
+        state: directory
+      when: archive_extract is changed
+
+    - name: Move archive into place
+      ansible.builtin.copy:
+        src: /tmp/webtrees-{{ webtree_version }}/webtrees
+        dest: "{{ documentroot }}"
+        owner: www-data
+        group: www-data
+        mode: '0775'
+        backup: true
+        follow: false
+        remote_src: true
+      become: true
+      when: archive_extract is changed
+
+    - name: Cleanup /tmp/webtrees-{{ webtree_version }}/ directory
+      file:
+        path: "/tmp/webtrees-{{ webtree_version }}/"
+        state: absent
+
+    - name: Add apache vhosts configuration.
+      become: true
+      template:
+        src: "{{ apache_vhosts_template }}"
+        dest: "{{ apache_conf_path }}/sites-available/{{ apache_vhosts_filename }}"
+        owner: www-data
+        group: www-data
+        mode: 0644
+      notify: restart apache
+      when: apache_create_vhosts | bool
+
+    - name: Add vhost symlink in sites-enabled.
+      become: true
+      file:
+        src: "{{ apache_conf_path }}/sites-available/{{ apache_vhosts_filename }}"
+        dest: "{{ apache_conf_path }}/sites-enabled/{{ apache_vhosts_filename }}"
+        state: link
+        mode: 0644
+      notify: restart apache
+      when: apache_create_vhosts | bool
+
+    - name: Remove default vhost in sites-enabled.
+      become: true
+      file:
+        path: "{{ apache_conf_path }}/sites-enabled/000-default.conf"
+        state: absent
+      notify: restart apache
+      when: apache_remove_default_vhost
+
+    - name: Enable Apache mods.
+      become: true
+      file:
+        src: "{{ apache_conf_path }}/mods-available/{{ item }}.load"
+        dest: "{{ apache_conf_path }}/mods-enabled/{{ item }}.load"
+        state: link
+        mode: 0644
+      with_items: "{{ apache_mods_enabled }}"
+      notify: restart apache
+
+    - name: Update security.conf
+      become: true
+      ansible.builtin.lineinfile:
+        dest: "{{ apache_conf_path }}/conf-available/security.conf"
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+        state: present
+      with_items: "{{ apache_security_configuration_items }}"
+      notify: restart apache
+
+
+#    - name: update mysql root password for all root accounts  
+#      become: true
+#      mysql_user:
+#        name: root
+#        host: "{{ item }}"
+#        password: "{{ mysql_root_password }}"
+#        login_user: root
+#        login_password: "{{ mysql_root_password }}"
+#        check_implicit_admin: yes
+#        priv: "*.*:ALL,GRANT"
+#      with_items:
+#      - "{{ ansible_hostname }}"
+#      - 127.0.0.1
+#      - ::1
+#      - localhost
+
+
+  handlers:
+    - name: restart apache
+      become: true
+      service:
+        name: "apache2"
+        state: "restarted"
