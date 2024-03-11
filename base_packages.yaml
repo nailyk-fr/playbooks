@@ -8,6 +8,9 @@
        - zsh
        - bash-completion
        - git
+       - htop
+       - ncdu
+       - dnsutils
   become: true
   gather_facts: true
 
