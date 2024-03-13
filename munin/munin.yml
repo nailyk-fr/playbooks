@@ -34,6 +34,8 @@
        group: root
        mode: '0644'
      become: true
+     notify:
+       - restart munin-node
 
    - name: Create node config on collector
      template:
@@ -44,4 +46,17 @@
        mode: '0644'
      delegate_to: "{{ munin_collector }}"
      become: true
+     notify:
+       - restart munin-collector
 
+   handlers:
+   - name: restart munin-collector
+     service:
+       name=munin
+       state=restarted
+     delegate_to: "{{ munin_collector }}"
+
+   - name: restart munin-node
+     service:
+       name=munin-node
+       state=restarted
