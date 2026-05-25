@@ -22,14 +22,13 @@
 
 
     - name: List all snapshots
-      community.proxmox.proxmox_snap:
+      community.proxmox.proxmox_snap_info:
         api_host: "{{ proxmox_host }}"
         api_user: "ansible"
         api_token_id: "{{ username }}"
         api_token_secret: "{{ pass }}"
         validate_certs: false
-        hostname: "docker"
-        state: list
+        hostname: "{{ inventory_hostname }}"
       register: snap_list
       delegate_to: localhost
 
