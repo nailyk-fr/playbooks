@@ -9,3 +9,11 @@
       debug:
         var: proxmox_api
 
+    - name: Print username
+      debug:
+        var:  "{{ username }}"
+
+    - name: Print password
+      debug:
+        var:  "{{ pass }}"
+
