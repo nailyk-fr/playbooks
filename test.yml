@@ -5,10 +5,6 @@
   tasks:
     - ping: ~
 
-    - name: Print endpoint
-      debug:
-        var: proxmox_api
-
     - name: Print username
       debug:
         var:  "{{ username }}"
@@ -16,4 +12,30 @@
     - name: Print password
       debug:
         var:  "{{ pass }}"
+
+
+    - name: Try simple API call
+      debug:
+        var:  "{{ pass }}"
+      delegate_to: localhost
+
+
+
+    - name: List all snapshots
+      community.proxmox.proxmox_snap:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "ansible"
+        api_token_id: "{{ username }}"
+        api_token_secret: "{{ pass }}"
+        validate_certs: false
+        hostname: "docker"
+        state: list
+      register: snap_list
+      delegate_to: localhost
+
+    - name: Display snapshots
+      ansible.builtin.debug:
+        var: snap_list
+      delegate_to: localhost
+
 
