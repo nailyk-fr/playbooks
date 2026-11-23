@@ -5,6 +5,10 @@
   tasks:
     - ping: ~
 
+    - name: Initialize reboot status
+      set_fact:
+        reboot_required: false
+
     - name: Update APT package manager repositories cache
       become: true
       apt:
@@ -53,6 +57,14 @@
             or ( hostvars[inventory_hostname].ansible_distribution is search('Devuan'))
             or ( hostvars[inventory_hostname].ansible_distribution is search('Ubuntu')) )
 
+    - name: Ensure needrestart is installed APT only
+      apt:
+        name: needrestart
+        state: present
+      when: ( (hostvars[inventory_hostname].ansible_distribution is search('Debian'))
+            or ( hostvars[inventory_hostname].ansible_distribution is search('Devuan'))
+            or ( hostvars[inventory_hostname].ansible_distribution is search('Ubuntu')) )
+
     - name: Ensure fail2ban is installed apk
       apk:
         name: fail2ban
@@ -64,4 +76,38 @@
         dest: /etc/ssh/sshd_config
         regexp: "^PermitRootLogin"
         line: "PermitRootLogin no"
+
+    - name: Check pending kernel reboot (needrestart on Debian family)
+      command: needrestart -b -k
+      register: kernel_check
+      changed_when: false
+      failed_when: false
+      when: ansible_distribution in ['Debian', 'Devuan', 'Ubuntu']
+
+    - name: Set reboot status (Debian family)
+      set_fact:
+        reboot_required: "{{ kernel_check.stdout is search('NEEDRESTART-KSTA: [23]') }}"
+      when:
+        - ansible_distribution in ['Debian', 'Devuan', 'Ubuntu']
+        - kernel_check.rc == 0
+
+    - name: Check Alpine kernel
+      shell: |
+        running=$(uname -r)
+        installed=$(basename /boot/System.map-* 2>/dev/null | sed 's,^System.map-,,' | sort -V | tail -n1)
+        [ -n "$installed" ] && [ "$running" = "$installed" ]
+      register: alpine_kernel_check
+      changed_when: false
+      failed_when: false
+      when: ansible_distribution == 'Alpine'
+
+    - name: Set Alpine reboot status
+      set_fact:
+        reboot_required: "{{ alpine_kernel_check.rc != 0 }}"
+      when: ansible_distribution == 'Alpine'
+
+    - name: Report pending reboot
+      debug:
+        msg: "REBOOT REQUIRED on {{ inventory_hostname }} (running kernel: {{ ansible_kernel }})"
+      when: reboot_required | default(false) | bool
 
